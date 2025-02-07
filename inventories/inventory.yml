@@ -1,0 +1,4 @@
+all:
+  hosts:
+    LINX:
+      ansible_host: 192.168.11.5

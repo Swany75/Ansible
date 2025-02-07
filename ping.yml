@@ -1,0 +1,6 @@
+--
+- name: Fer un ping als hosts
+  hosts: all
+  tasks:
+    - name: Ping
+      ping:

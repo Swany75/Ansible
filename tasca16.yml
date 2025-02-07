@@ -1,0 +1,42 @@
+---
+- name: Configuracio del servidor Apache i virtualhost
+  hosts: all
+  become: true
+  tasks:
+    - name: Actualitzar els paquets i els repositoris
+      apt:
+        update_cache: yes
+
+    - name: Instal.lar el servidor Apache
+      apt:
+        name: apache2
+        state: present
+        update_cache: yes
+
+    - name: Crear el directori del virtualhost
+      file:
+        path: /var/www/demo
+        state: directory
+        mode: '0755'
+
+    - name: Crear el fitxer index.html
+      copy:
+        dest: /var/www/demo/index.html
+        content: "HOLA DEMO 11"
+        mode: '0644'
+
+    - name: Configurar la plantilla del virtualhost
+      template:
+        src: templates/virtualhost.conf
+        dest: /etc/apache2/sites-available/demo.conf
+
+    - name: Activar el virtualhost
+      command: a2ensite demo
+
+    - name: Desactivar el virtualhost per defecte
+      command: a2dissite 000-default
+
+    - name: Reiniciar el servei Apache
+      service:
+        name: apache2
+        state: restarted
