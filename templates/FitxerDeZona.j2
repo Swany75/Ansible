@@ -1,0 +1,19 @@
+$TTL 604800
+@   IN  SOA ns1.prova2.cat. admin.prova2.cat. (
+        2         ; Serial
+        604800    ; Refresh
+        86400     ; Retry
+        2419200   ; Expire
+        604800 )  ; Negative Cache TTL
+
+; Servidors de noms
+@   IN  NS  ns1.prova2.cat.
+
+; Registres A
+@   IN  A   192.168.11.5
+ns1 IN  A   192.168.11.5
+www IN  A   192.168.11.5
+rt  IN  A   192.168.11.1
+
+; Alias (CNAME)
+svr IN  CNAME   www

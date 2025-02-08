@@ -27,7 +27,7 @@
 
     - name: Configurar la plantilla del virtualhost
       template:
-        src: templates/virtualhost.conf
+        src: templates/virtualhost.j2
         dest: /etc/apache2/sites-available/demo.conf
 
     - name: Activar el virtualhost
