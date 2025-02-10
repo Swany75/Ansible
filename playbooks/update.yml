@@ -1,0 +1,15 @@
+---
+- name: Actualitzar tots els hosts
+  hosts: all
+  tasks:
+    - name: Actualitzar l'índex de paquets
+      ansible.builtin.apt:
+        update_cache: yes
+
+    - name: Fer un upgrade dels paquets instal·lats
+      ansible.builtin.apt:
+        upgrade: yes
+
+    - name: Fer un dist-upgrade
+      ansible.builtin.command:
+        cmd: apt dist-upgrade -y
