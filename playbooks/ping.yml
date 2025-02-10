@@ -1,6 +1,6 @@
---
+---
 - name: Fer un ping als hosts
-  hosts: all
+  hosts: "{{ host | default('all') }}"
   tasks:
     - name: Ping
-      ping:
+      ansible.builtin.ping:

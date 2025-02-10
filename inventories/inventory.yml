@@ -1,4 +1,12 @@
 all:
   hosts:
-    LINX:
-      ansible_host: 192.168.11.5
+    CLIENT:
+      ansible_host: 192.168.1.180
+    SVR-DNS:
+      ansible_host: 192.168.11.10
+    SVR-WEB:
+      ansible_host: 192.168.11.20
+    CLOUD-01:
+      ansible_host: 172.16.0.10
+    CLOUD-02:
+      ansible_host: 172.16.0.20
