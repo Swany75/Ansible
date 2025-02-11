@@ -19,6 +19,6 @@ ssh-copy-id -i keys/ansible-key.pub root@{IP}
 ansible-playbook playbooks/ping.yml
 ```
 
-## Disclaimer:
+## Disclaimer!
 
 Som conscient de que no es recomanable compartir les claus, pero aquestes no tenen cap valor, son per fer proves.
