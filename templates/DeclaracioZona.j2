@@ -1,4 +1,4 @@
-zone "{{ domini }}" {
+zone "{{ domain_name }}" {
     type master;
-    file "/etc/bind/db.{{ domini }}";
+    file "{{ bind_zones_dir }}/db.{{ domain_name }}";
 };

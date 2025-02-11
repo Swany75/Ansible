@@ -1,0 +1,66 @@
+---
+- name: Configurar zona DNS amb BIND9
+  hosts: "{{ hostDNS }}"
+  become: yes
+  vars:
+    bind_config_dir: "/etc/bind"
+    bind_zones_dir: "/etc/bind/zones"
+    domain_name: "{{ zonename }}"
+    zone_file: "db.{{ zonename }}"
+
+  tasks:
+    - name: Instal·lar bind9 i dnsutils
+      apt:
+        name:
+          - bind9
+          - dnsutils
+        state: present
+        update_cache: yes
+
+    - name: Assegurar-se que la carpeta de zones existeix
+      file:
+        path: "{{ bind_zones_dir }}"
+        state: directory
+        owner: root
+        group: bind
+        mode: "0755"
+
+    - name: Crear la declaració de la zona
+      template:
+        src: "/home/Ansible/templates/DeclaracioZona.j2"
+        dest: "{{ bind_config_dir }}/named.conf.local"
+      notify: Reiniciar BIND9
+
+    - name: Crear el fitxer de la zona
+      template:
+        src: "/home/Ansible/templates/FitxerDeZona.j2"
+        dest: "{{ bind_zones_dir }}/{{ zone_file }}"
+      vars:
+        zona: "{{ zonename }}"
+        IP_hostDNS: "{{ hostvars[hostDNS].ansible_host }}"
+        IP_hostWEB: "{{ hostvars[hostWEB].ansible_host }}"
+        IP: "{{ hostvars[hostDNS].ansible_host }}"  # Afegir la variable IP
+      notify: Reiniciar BIND9
+
+    - name: Assegurar-se que BIND9 està actiu
+      systemd:
+        name: bind9
+        state: started
+        enabled: yes
+
+  handlers:
+    - name: Reiniciar BIND9
+      systemd:
+        name: bind9
+        state: restarted
+      listen: "Reiniciar BIND9"
+
+    - name: Comprovar la configuració amb dig
+      command: "dig @{{ hostvars[hostDNS].ansible_host }} {{ zonename }}"
+      register: dig_result
+      listen: "Reiniciar BIND9"
+
+    - name: Mostrar resultat de dig
+      debug:
+        msg: "{{ dig_result.stdout }}"
+      listen: "Reiniciar BIND9"

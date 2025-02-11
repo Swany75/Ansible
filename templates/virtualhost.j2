@@ -1,9 +1,14 @@
 <VirtualHost *:80>
-    ServerName www.demo.com
-    DocumentRoot /var/www/demo
-    <Directory /var/www/demo>
+    ServerAdmin webmaster@{{ zone }}
+    ServerName www.{{ zone }}
+    DocumentRoot /var/www/{{ zone }}
+
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+    <Directory /var/www/{{ zone }}>
         Options Indexes FollowSymLinks
-        AllowOverride None
+        AllowOverride All
         Require all granted
     </Directory>
 </VirtualHost>

@@ -1,0 +1,52 @@
+---
+- name: Create VirtualHost for Apache2
+  hosts: "{{ WEB }}"
+  become: true
+  vars:
+    zone: "{{ zone }}"
+    DNS: "{{ DNS }}"
+  tasks:
+    - name: Install Apache2
+      apt:
+        name: apache2
+        state: present
+        update_cache: yes
+
+    - name: Enable mod_rewrite for Apache2
+      apache2_module:
+        name: rewrite
+        state: present
+
+    - name: Create virtualhost configuration file
+      template:
+        src: ../templates/virtualhost.j2
+        dest: "/etc/apache2/sites-available/{{ zone }}.conf"
+        mode: '0644'
+
+    - name: Enable the new site
+      command: a2ensite "{{ zone }}.conf"
+      notify:
+        - Reload Apache2
+
+    - name: Disable the default site
+      command: a2dissite 000-default.conf
+      when: ansible_facts['distribution'] == "Debian"
+
+    - name: Create the index.html file from template
+      template:
+        src: /home/Ansible/templates/index.html.j2
+        dest: "/var/www/{{ zone }}/index.html"
+        mode: '0644'
+
+  handlers:
+    - name: Reload Apache2
+      service:
+        name: apache2
+        state: reloaded
+
+  post_tasks:
+    - name: Test if VirtualHost is accessible via curl
+      command: curl -s "http://www.{{ zone }}"
+      register: curl_result
+      failed_when: "curl_result.stdout is not search('Benvingut a {{ zone }}')"
+      changed_when: false

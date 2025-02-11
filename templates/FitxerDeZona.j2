@@ -1,5 +1,5 @@
 $TTL 604800
-@   IN  SOA ns1.prova2.cat. admin.prova2.cat. (
+@   IN  SOA ns1.{{ zona }}. admin.{{ zona }}. (
         2         ; Serial
         604800    ; Refresh
         86400     ; Retry
@@ -7,13 +7,13 @@ $TTL 604800
         604800 )  ; Negative Cache TTL
 
 ; Servidors de noms
-@   IN  NS  ns1.prova2.cat.
+@   IN  NS  ns1.{{ zona }}.
+{{ zona }}. IN    NS    {{ zona }}.
 
 ; Registres A
-@   IN  A   192.168.11.5
-ns1 IN  A   192.168.11.5
-www IN  A   192.168.11.5
-rt  IN  A   192.168.11.1
+@   IN  A   {{ IP_hostDNS }}
+ns1 IN  A   {{ IP_hostDNS }}
+www IN  A   {{ IP_hostWEB }}
+{{ zona }}. IN    A    {{ IP_hostDNS }}
 
 ; Alias (CNAME)
-svr IN  CNAME   www

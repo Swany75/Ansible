@@ -1,4 +1,4 @@
-xall:
+all:
   hosts:
     CLIENT:
       ansible_host: 192.168.1.180
