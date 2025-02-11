@@ -32,11 +32,21 @@
       command: a2dissite 000-default.conf
       when: ansible_facts['distribution'] == "Debian"
 
-    - name: Create the index.html file from template
-      template:
-        src: /home/Ansible/templates/index.html.j2
+    - name: Create the directory for the virtual host
+      file:
+        path: "/var/www/{{ zone }}"
+        state: directory
+        mode: '0755'
+
+    - name: Create the index.html file
+      copy:
+        content: "<html><body><h1>Benvingut a {{ zone }}</h1></body></html>"
         dest: "/var/www/{{ zone }}/index.html"
         mode: '0644'
+
+    - name: Set the zone variable for curl check
+      set_fact:
+        curl_zone: "{{ zone }}"
 
   handlers:
     - name: Reload Apache2
@@ -46,7 +56,7 @@
 
   post_tasks:
     - name: Test if VirtualHost is accessible via curl
-      command: curl -s "http://www.{{ zone }}"
+      command: curl "http://www.{{ curl_zone }}"
       register: curl_result
-      failed_when: "curl_result.stdout is not search('Benvingut a {{ zone }}')"
+      failed_when: curl_zone not in curl_result.stdout
       changed_when: false
