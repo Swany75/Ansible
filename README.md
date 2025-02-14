@@ -7,6 +7,12 @@ My Ansible Playbooks
 apt install ansible
 ```
 
+## Donar permisos a la clau privada
+
+```bash
+chmod 600 /home/Ansible/keys/ansible-key
+```
+
 ## Envia la clau publica als hosts
 
 ```bash
