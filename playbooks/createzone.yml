@@ -25,10 +25,15 @@
         group: bind
         mode: "0755"
 
-    - name: Crear la declaració de la zona
-      template:
-        src: "/home/Ansible/templates/DeclaracioZona.j2"
-        dest: "{{ bind_config_dir }}/named.conf.local"
+    - name: Afegir la declaració de la zona a named.conf.local
+      lineinfile:
+        path: "{{ bind_config_dir }}/named.conf.local"
+        line: |
+          zone "{{ domain_name }}" {
+              type master;
+              file "{{ bind_zones_dir }}/db.{{ domain_name }}";
+          };
+        insertafter: EOF
       notify: Reiniciar BIND9
 
     - name: Crear el fitxer de la zona
@@ -39,7 +44,6 @@
         zona: "{{ zonename }}"
         IP_hostDNS: "{{ hostvars[hostDNS].ansible_host }}"
         IP_hostWEB: "{{ hostvars[hostWEB].ansible_host }}"
-        IP: "{{ hostvars[hostDNS].ansible_host }}"  # Afegir la variable IP
       notify: Reiniciar BIND9
 
     - name: Assegurar-se que BIND9 està actiu
