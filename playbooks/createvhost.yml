@@ -1,23 +1,51 @@
 ---
-- name: Create VirtualHost for Apache2
+- name: Create VirtualHost with HTTPS for Apache2
   hosts: "{{ WEB }}"
   become: true
   vars:
     zone: "{{ zone }}"
     DNS: "{{ DNS }}"
   tasks:
-    - name: Install Apache2
+    - name: Install Apache2 and OpenSSL
       apt:
-        name: apache2
+        name:
+          - apache2
+          - openssl
         state: present
         update_cache: yes
 
-    - name: Enable mod_rewrite for Apache2
-      apache2_module:
-        name: rewrite
-        state: present
+    - name: Enable necessary Apache modules
+      command: a2enmod "{{ item }}"
+      loop:
+        - rewrite
+        - ssl
+      notify: Restart Apache2
 
-    - name: Create virtualhost configuration file
+    - name: Create SSL private key
+      command: openssl genpkey -algorithm RSA -out /etc/ssl/private/{{ zone }}.key
+      args:
+        creates: /etc/ssl/private/{{ zone }}.key
+
+    - name: Create SSL certificate signing request (CSR)
+      command: >
+        openssl req -new -key /etc/ssl/private/{{ zone }}.key -out /etc/ssl/certs/{{ zone }}.csr
+        -subj "/C=ES/ST=Baleares/L=Manacor/O={{ zone }}/OU={{ zone }}/CN={{ zone }}/emailAddress={{ zone }}"
+      args:
+        creates: /etc/ssl/certs/{{ zone }}.csr
+
+    - name: Self-sign SSL certificate
+      command: openssl x509 -req -in /etc/ssl/certs/{{ zone }}.csr -signkey /etc/ssl/private/{{ zone }}.key -out /etc/ssl/certs/{{ zone }}.crt
+      args:
+        creates: /etc/ssl/certs/{{ zone }}.crt
+
+    - name: Set permissions for SSL private key
+      file:
+        path: "/etc/ssl/private/{{ zone }}.key"
+        mode: '0600'
+        owner: root
+        group: root
+
+    - name: Create HTTP and HTTPS virtualhost configuration file
       template:
         src: ../templates/virtualhost.j2
         dest: "/etc/apache2/sites-available/{{ zone }}.conf"
@@ -25,38 +53,10 @@
 
     - name: Enable the new site
       command: a2ensite "{{ zone }}.conf"
-      notify:
-        - Reload Apache2
-
-    - name: Disable the default site
-      command: a2dissite 000-default.conf
-      when: ansible_facts['distribution'] == "Debian"
-
-    - name: Create the directory for the virtual host
-      file:
-        path: "/var/www/{{ zone }}"
-        state: directory
-        mode: '0755'
-
-    - name: Create the index.html file
-      copy:
-        content: "<html><body><h1>Benvingut a {{ zone }}</h1></body></html>"
-        dest: "/var/www/{{ zone }}/index.html"
-        mode: '0644'
-
-    - name: Set the zone variable for curl check
-      set_fact:
-        curl_zone: "{{ zone }}"
+      notify: Restart Apache2
 
   handlers:
-    - name: Reload Apache2
+    - name: Restart Apache2
       service:
         name: apache2
-        state: reloaded
-
-  post_tasks:
-    - name: Test if VirtualHost is accessible via curl
-      command: curl "http://www.{{ curl_zone }}"
-      register: curl_result
-      failed_when: curl_zone not in curl_result.stdout
-      changed_when: false
+        state: restarted
