@@ -15,5 +15,7 @@ $TTL 604800
 ns1 IN  A   {{ IP_hostDNS }}
 www IN  A   {{ IP_hostWEB }}
 {{ zona }}. IN    A    {{ IP_hostDNS }}
+svr1 IN A {{ IP_hostDNS }}
 
 ; Alias (CNAME)
+dns IN CNAME ns1.{{ zona }}.
