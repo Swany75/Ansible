@@ -3,9 +3,9 @@
     ServerName www.{{ zone }}
     DocumentRoot /var/www/{{ zone }}
 
-    RewriteEngine on
-    RewriteCond %{SERVER_NAME} =www.{{ zone }}
-    RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
+    #RewriteEngine on
+    #RewriteCond %{SERVER_NAME} =www.{{ zone }}
+    #RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
 
     ErrorLog ${APACHE_LOG_DIR}/error.log
     CustomLog ${APACHE_LOG_DIR}/access.log combined
